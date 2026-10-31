@@ -42,3 +42,25 @@
 - **Git 提交**：`1aabf4c docs: record lemo-opuscar plugin installation`
 
 ---
+
+## [2026-10-31 20:47] 安装 lemo-opuscar 的渲染依赖
+
+- **需求/问题描述**：
+  > 安装渲染所需的依赖；用户询问本机是否已有 Python。
+
+- **实际实现的功能与改动**：
+  - [Python 核实]：本机只有系统自带的 Python 3.9.6，低于要求的 3.11+。
+  - [系统工具]：通过 Homebrew 安装 ffmpeg 9.0.2 和 uv 0.13.6；安装 ffmpeg 时 Homebrew 同时安装或升级了相关依赖，其中 xz 从 5.8.3 升级到 5.8.4。
+  - [风格库依赖]：运行 `setup.sh deps voice music`，安装 Node 包、Chrome Headless Shell、`.venv` 内的 Python 3.12.16 和三个层级的 Python 包，并下载 Kokoro 语音模型。`~/lemo-opuscar` 现占用 853M。
+  - [测试/验证]：`setup.sh` 不再报告缺失项；Python 包全部可以导入；用 2 秒测试页面依次运行 `video.mjs`、`tts.py`、`asr_check.py`（mismatches 为 0）和 `mux.sh`，退出码均为 0；成片含 h264 和 aac 轨道，时长 2 秒，首尾帧校验值不同，解码无错误。
+  - [未完成验证]：`mux.sh` 对测试成片报告响度 -17.9 LUFS，未达到 -14 LUFS 目标，测试音频只有 1.36 秒，原因尚未核实；没有渲染风格库中的风格；未下载乐器采样库和 HDRI；未按视觉验证流程查看画面。
+
+- **涉及文件**：
+  - `memory/agents.md` (+1 / -1)
+  - `docs/CHANGELOG.md`
+  - `context/2026/10/31/20-47-35/对话.md`（新增）
+  - 本地未提交：`.agent/lemo-opuscar-smoke/`、`~/lemo-opuscar/`、Homebrew 安装内容、`~/Library/Caches/ms-playwright/`
+
+- **Git 提交**：待提交
+
+---
