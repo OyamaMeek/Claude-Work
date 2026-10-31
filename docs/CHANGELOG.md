@@ -64,3 +64,22 @@
 - **Git 提交**：`cfa7ebe docs: record lemo-opuscar dependency installation`
 
 ---
+
+## [2026-10-31 23:34] 删除 iphone-use MCP 服务器
+
+- **需求/问题描述**：
+  > 用户发送 MCP 服务器窗口截图，要求删除其中的 iphone-use。
+
+- **实际实现的功能与改动**：
+  - [移除服务器]：运行 `claude mcp remove iphone-use -s user`，从 `~/.claude.json` 的用户级配置中移除该服务器。
+  - [测试/验证]：命令退出码为 0；`claude mcp get iphone-use` 报告服务器不存在；`~/.claude.json` 的 `mcpServers` 为空，全文不再包含 `iphone-use`。
+  - [未完成验证]：没有重新打开桌面应用的 MCP 服务器窗口核对显示结果。
+
+- **涉及文件**：
+  - `docs/CHANGELOG.md`
+  - `context/2026/10/31/23-34-56/对话.md`（新增）
+  - 本地未提交：`~/.claude.json`
+
+- **Git 提交**：待提交
+
+---
