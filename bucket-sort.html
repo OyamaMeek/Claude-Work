@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>桶排序演示</title>
+<style>
+  :root {
+    --bg: #f5f6fa; --panel: #ffffff; --text: #1d2433; --muted: #6b7385; --border: #e2e5ee;
+    --accent: #4f6bed; --accent-soft: #e7ecfd;
+    --hl: #d97706; --hl-soft: #fff3d6;
+    --cmp: #dc2626; --cmp-soft: #fde4e4;
+    --ok: #15803d; --ok-soft: #dcf3e4;
+    --shadow: 0 1px 2px rgba(20, 30, 60, .06), 0 4px 16px rgba(20, 30, 60, .05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #10131a; --panel: #191d27; --text: #e6e9f0; --muted: #8b93a7; --border: #2a3040;
+      --accent: #7d94ff; --accent-soft: #232b4a;
+      --hl: #fbbf24; --hl-soft: #3a2e10;
+      --cmp: #f87171; --cmp-soft: #3d1b1b;
+      --ok: #4ade80; --ok-soft: #15321f;
+      --shadow: none;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #10131a; --panel: #191d27; --text: #e6e9f0; --muted: #8b93a7; --border: #2a3040;
+    --accent: #7d94ff; --accent-soft: #232b4a;
+    --hl: #fbbf24; --hl-soft: #3a2e10;
+    --cmp: #f87171; --cmp-soft: #3d1b1b;
+    --ok: #4ade80; --ok-soft: #15321f;
+    --shadow: none;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 15px/1.6 -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+  }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 28px 16px 48px; }
+  header h1 { margin: 0 0 4px; font-size: 26px; }
+  header p { margin: 0 0 20px; color: var(--muted); }
+
+  .panel {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 14px;
+    box-shadow: var(--shadow); padding: 16px 18px; margin-bottom: 16px;
+  }
+  .panel h2 { margin: 0 0 12px; font-size: 14px; font-weight: 600; color: var(--muted); letter-spacing: .04em; }
+
+  /* 控制区 */
+  .controls { display: flex; flex-wrap: wrap; gap: 12px 16px; align-items: flex-end; }
+  .field { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--muted); }
+  .field.grow { flex: 1 1 260px; }
+  input[type="text"], select {
+    font: inherit; color: var(--text); background: var(--bg);
+    border: 1px solid var(--border); border-radius: 8px; padding: 7px 10px; min-width: 0;
+  }
+  input[type="range"] { accent-color: var(--accent); width: 120px; }
+  button {
+    font: inherit; font-size: 14px; color: var(--text); background: var(--bg);
+    border: 1px solid var(--border); border-radius: 8px; padding: 7px 14px; cursor: pointer;
+    transition: background .15s, border-color .15s;
+  }
+  button:hover:not(:disabled) { border-color: var(--accent); }
+  button:disabled { opacity: .45; cursor: not-allowed; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn-row { display: flex; flex-wrap: wrap; gap: 8px; }
+  .error { color: var(--cmp); font-size: 13px; min-height: 1em; margin-top: 8px; }
+
+  /* 进度与说明 */
+  .status { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; font-size: 13px; color: var(--muted); }
+  .progress { flex: 1; height: 6px; background: var(--border); border-radius: 99px; overflow: hidden; }
+  .progress > div { height: 100%; background: var(--accent); width: 0; transition: width .2s; }
+  .msg {
+    background: var(--accent-soft); border-radius: 10px; padding: 10px 14px;
+    font-size: 15px; min-height: 46px; display: flex; align-items: center;
+  }
+
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 16px; }
+  @media (max-width: 860px) { .layout { grid-template-columns: minmax(0, 1fr); } }
+
+  /* 元素格子 */
+  .row { display: flex; flex-wrap: wrap; gap: 8px; min-height: 52px; }
+  .cell {
+    width: 44px; height: 44px; border-radius: 9px; display: grid; place-items: center;
+    font-weight: 600; font-variant-numeric: tabular-nums;
+    background: var(--bg); border: 2px solid var(--border);
+    transition: background .2s, border-color .2s, opacity .2s, transform .2s;
+  }
+  .cell.active { background: var(--hl-soft); border-color: var(--hl); transform: translateY(-3px); }
+  .cell.cmp { background: var(--cmp-soft); border-color: var(--cmp); }
+  .cell.done { background: var(--ok-soft); border-color: var(--ok); }
+  .cell.gone { opacity: .28; border-style: dashed; }
+  .cell.new { animation: pop .35s ease-out; background: var(--hl-soft); border-color: var(--hl); }
+  @keyframes pop { from { transform: scale(.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .placeholder { color: var(--muted); font-size: 13px; align-self: center; }
+
+  /* 桶 */
+  .buckets { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 10px; }
+  .bucket {
+    border: 2px solid var(--border); border-top: none; border-radius: 0 0 12px 12px;
+    min-height: 170px; display: flex; flex-direction: column; transition: border-color .2s, background .2s;
+  }
+  .bucket.current { border-color: var(--accent); background: var(--accent-soft); }
+  .bucket-head {
+    text-align: center; padding: 6px 4px; border-bottom: 1px dashed var(--border);
+    font-size: 13px; line-height: 1.35;
+  }
+  .bucket-head b { display: block; font-size: 14px; }
+  .bucket-head span { color: var(--muted); font-size: 12px; }
+  .bucket-body { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 8px 4px; }
+
+  /* 伪代码 */
+  pre.code {
+    margin: 0; font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    white-space: pre-wrap;
+  }
+  pre.code .ln { display: block; padding: 2px 8px; border-radius: 6px; border-left: 3px solid transparent; }
+  pre.code .ln.on { background: var(--hl-soft); border-left-color: var(--hl); }
+  .legend { display: grid; gap: 6px; font-size: 13px; }
+  .legend div { display: flex; align-items: center; gap: 8px; }
+  .legend .cell { width: 22px; height: 22px; border-radius: 6px; font-size: 0; }
+  .notes { font-size: 13px; color: var(--muted); margin: 0; padding-left: 18px; }
+  .notes li { margin: 3px 0; }
+  .notes b { color: var(--text); font-weight: 600; }
+  kbd {
+    font: 12px ui-monospace, Menlo, monospace; border: 1px solid var(--border);
+    border-bottom-width: 2px; border-radius: 4px; padding: 0 4px; background: var(--bg);
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>桶排序 Bucket Sort</h1>
+    <p>把数据按数值范围分到若干个桶里，每个桶内部单独排序，最后按桶的顺序依次取出。</p>
+  </header>
+
+  <section class="panel">
+    <div class="controls">
+      <label class="field grow">输入数据（整数，用逗号或空格分隔，最多 20 个）
+        <input id="data" type="text" autocomplete="off">
+      </label>
+      <label class="field">桶数量
+        <select id="k"></select>
+      </label>
+      <div class="btn-row">
+        <button id="random">随机生成</button>
+        <button id="apply" class="primary">应用</button>
+      </div>
+    </div>
+    <div class="error" id="error"></div>
+    <div class="controls">
+      <div class="btn-row">
+        <button id="first" title="回到开头">⏮ 重置</button>
+        <button id="prev" title="上一步 (←)">◀ 上一步</button>
+        <button id="play" class="primary" title="播放 / 暂停 (空格)">▶ 播放</button>
+        <button id="next" title="下一步 (→)">下一步 ▶</button>
+        <button id="last" title="跳到结尾">⏭ 结尾</button>
+      </div>
+      <label class="field">速度
+        <input id="speed" type="range" min="1" max="10" value="5">
+      </label>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="status">
+      <span id="stepText">第 0 / 0 步</span>
+      <div class="progress"><div id="bar"></div></div>
+    </div>
+    <div class="msg" id="msg"></div>
+  </section>
+
+  <div class="layout">
+    <main>
+      <section class="panel">
+        <h2>① 输入数组</h2>
+        <div class="row" id="input"></div>
+      </section>
+      <section class="panel">
+        <h2>② 桶</h2>
+        <div class="buckets" id="buckets"></div>
+      </section>
+      <section class="panel">
+        <h2>③ 输出数组</h2>
+        <div class="row" id="output"></div>
+      </section>
+    </main>
+
+    <aside>
+      <section class="panel">
+        <h2>伪代码</h2>
+        <pre class="code" id="code"></pre>
+      </section>
+      <section class="panel">
+        <h2>图例</h2>
+        <div class="legend">
+          <div><span class="cell active"></span>当前处理的元素</div>
+          <div><span class="cell cmp"></span>正在比较的元素</div>
+          <div><span class="cell done"></span>已就位 / 已排序</div>
+          <div><span class="cell gone"></span>已移入桶中</div>
+        </div>
+      </section>
+      <section class="panel">
+        <h2>复杂度</h2>
+        <ul class="notes">
+          <li>平均时间：<b>O(n + k)</b>（数据分布均匀时）</li>
+          <li>最坏时间：<b>O(n²)</b>（全部落入同一个桶）</li>
+          <li>空间：<b>O(n + k)</b></li>
+          <li>稳定性：<b>稳定</b>（桶内使用插入排序）</li>
+          <li>快捷键：<kbd>←</kbd> <kbd>→</kbd> 单步，<kbd>空格</kbd> 播放</li>
+        </ul>
+      </section>
+    </aside>
+  </div>
+</div>
+
+<script>
+const CODE = [
+  'bucketSort(A, k):',
+  '  创建 k 个空桶',
+  '  for x in A:',
+  '    i = ⌊(x − min) × k / (max − min + 1)⌋',
+  '    桶[i].append(x)',
+  '  for 每个桶 B:',
+  '    插入排序(B)',
+  '  依次连接所有桶 → 结果',
+];
+const MAX_N = 20, MAX_K = 10;
+const $ = id => document.getElementById(id);
+
+let steps = [], cur = 0, timer = null, meta = null;
+
+const clone = list => list.map(c => ({ ...c }));
+
+function buildSteps(arr, k) {
+  const out = [];
+  const min = Math.min(...arr), max = Math.max(...arr), range = max - min + 1;
+  const input = arr.map(v => ({ v, s: '' }));
+  const buckets = Array.from({ length: k }, () => []);
+  const output = [];
+  const snap = (msg, line, bucket = -1) => out.push({
+    input: clone(input), buckets: buckets.map(clone), output: clone(output), msg, line, bucket,
+  });
+
+  snap(`共 ${arr.length} 个元素，最小值 ${min}，最大值 ${max}。创建 ${k} 个空桶，每个桶负责一段数值区间。`, 1);
+
+  // 1. 分配
+  arr.forEach((v, idx) => {
+    const i = Math.floor((v - min) * k / range);
+    input[idx].s = 'active';
+    snap(`取出 ${v}，计算桶编号：i = ⌊(${v} − ${min}) × ${k} / ${range}⌋ = ${i}`, 3, i);
+    input[idx].s = 'gone';
+    buckets[i].push({ v, s: 'new' });
+    snap(`把 ${v} 放入桶 ${i}`, 4, i);
+    buckets[i].forEach(c => (c.s = ''));
+  });
+
+  // 2. 桶内插入排序
+  buckets.forEach((b, bi) => {
+    if (b.length === 0) { snap(`桶 ${bi} 为空，跳过`, 5, bi); return; }
+    if (b.length === 1) { b[0].s = 'done'; snap(`桶 ${bi} 只有 1 个元素，天然有序`, 6, bi); return; }
+    b[0].s = 'done';
+    snap(`对桶 ${bi} 做插入排序（共 ${b.length} 个元素）`, 6, bi);
+    for (let p = 1; p < b.length; p++) {
+      let j = p;
+      b[j].s = 'active';
+      snap(`把 ${b[j].v} 插入到前面已排好序的部分`, 6, bi);
+      while (j > 0) {
+        b[j - 1].s = 'cmp';
+        if (b[j - 1].v > b[j].v) {
+          snap(`比较：${b[j - 1].v} > ${b[j].v}，需要交换`, 6, bi);
+          [b[j - 1], b[j]] = [b[j], b[j - 1]];
+          b[j].s = 'done';
+          j--;
+          snap(`交换后 ${b[j].v} 向前移动一位`, 6, bi);
+        } else {
+          snap(`比较：${b[j - 1].v} ≤ ${b[j].v}，位置正确，停止`, 6, bi);
+          b[j - 1].s = 'done';
+          break;
+        }
+      }
+      b[j].s = 'done';
+    }
+    snap(`桶 ${bi} 排序完成：[${b.map(c => c.v).join(', ')}]`, 6, bi);
+  });
+
+  // 3. 收集
+  buckets.forEach((b, bi) => {
+    while (b.length) {
+      const c = b.shift();
+      output.push({ v: c.v, s: 'new' });
+      snap(`从桶 ${bi} 取出 ${c.v}，放到结果第 ${output.length} 位`, 7, bi);
+      output[output.length - 1].s = 'done';
+    }
+  });
+  snap(`排序完成！结果：[${output.map(c => c.v).join(', ')}]`, -1);
+  return out;
+}
+
+// 桶 i 实际覆盖的整数区间
+function bucketRange(i, k, min, range) {
+  const lo = min + Math.ceil(i * range / k);
+  const hi = min + Math.ceil((i + 1) * range / k) - 1;
+  return lo > hi ? '（空区间）' : lo === hi ? `${lo}` : `${lo} ~ ${hi}`;
+}
+
+function cellsHTML(list, empty) {
+  if (!list.length) return `<span class="placeholder">${empty}</span>`;
+  return list.map(c => `<div class="cell ${c.s}">${c.v}</div>`).join('');
+}
+
+function render() {
+  const st = steps[cur];
+  $('input').innerHTML = cellsHTML(st.input, '（空）');
+  $('output').innerHTML = cellsHTML(st.output, '等待收集…');
+  $('buckets').innerHTML = st.buckets.map((b, i) => `
+    <div class="bucket ${st.bucket === i ? 'current' : ''}">
+      <div class="bucket-head"><b>桶 ${i}</b><span>${bucketRange(i, meta.k, meta.min, meta.range)}</span></div>
+      <div class="bucket-body">${b.map(c => `<div class="cell ${c.s}">${c.v}</div>`).join('')}</div>
+    </div>`).join('');
+  $('code').innerHTML = CODE.map((l, i) => `<span class="ln ${st.line === i ? 'on' : ''}">${l}</span>`).join('');
+  $('msg').textContent = st.msg;
+  $('stepText').textContent = `第 ${cur + 1} / ${steps.length} 步`;
+  $('bar').style.width = `${(cur + 1) / steps.length * 100}%`;
+  $('prev').disabled = $('first').disabled = cur === 0;
+  $('next').disabled = $('last').disabled = cur === steps.length - 1;
+  if (cur === steps.length - 1) stop();
+}
+
+function go(i) { cur = Math.max(0, Math.min(steps.length - 1, i)); render(); }
+
+function delay() { return 1500 / Number($('speed').value) ** 0.9; }
+function play() {
+  if (cur === steps.length - 1) cur = 0;
+  $('play').textContent = '⏸ 暂停';
+  const tick = () => { go(cur + 1); if (timer) timer = setTimeout(tick, delay()); };
+  timer = setTimeout(tick, delay());
+}
+function stop() { clearTimeout(timer); timer = null; $('play').textContent = '▶ 播放'; }
+
+function parse(text) {
+  const parts = text.split(/[\s,，、]+/).filter(Boolean);
+  if (!parts.length) throw new Error('请输入至少一个整数');
+  if (parts.length > MAX_N) throw new Error(`最多支持 ${MAX_N} 个数`);
+  return parts.map(p => {
+    if (!/^-?\d+$/.test(p)) throw new Error(`“${p}” 不是整数`);
+    const n = Number(p);
+    if (Math.abs(n) > 999) throw new Error('数值范围请控制在 -999 ~ 999');
+    return n;
+  });
+}
+
+function apply() {
+  try {
+    const arr = parse($('data').value);
+    const k = Number($('k').value);
+    const min = Math.min(...arr), max = Math.max(...arr);
+    meta = { k, min, range: max - min + 1 };
+    $('error').textContent = '';
+    stop();
+    steps = buildSteps(arr, k);
+    go(0);
+  } catch (e) {
+    $('error').textContent = e.message;
+  }
+}
+
+function randomData() {
+  const n = 10 + Math.floor(Math.random() * 5);
+  $('data').value = Array.from({ length: n }, () => Math.floor(Math.random() * 100)).join(', ');
+  apply();
+}
+
+for (let i = 2; i <= MAX_K; i++) $('k').add(new Option(`${i} 个`, i, false, i === 5));
+$('random').onclick = randomData;
+$('apply').onclick = apply;
+$('k').onchange = apply;
+$('data').onkeydown = e => { if (e.key === 'Enter') apply(); };
+$('first').onclick = () => { stop(); go(0); };
+$('last').onclick = () => { stop(); go(steps.length - 1); };
+$('prev').onclick = () => { stop(); go(cur - 1); };
+$('next').onclick = () => { stop(); go(cur + 1); };
+$('play').onclick = () => (timer ? stop() : play());
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' && e.target.type === 'text') return;
+  if (e.key === 'ArrowLeft') { stop(); go(cur - 1); }
+  else if (e.key === 'ArrowRight') { stop(); go(cur + 1); }
+  else if (e.key === ' ') { e.preventDefault(); timer ? stop() : play(); }
+});
+
+$('data').value = '29, 25, 3, 49, 9, 37, 21, 43, 77, 52, 64, 88';
+apply();
+</script>
+</body>
+</html>

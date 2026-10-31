@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>冒泡排序动画</title>
+<style>
+  :root {
+    --bg: #f6f7f9;
+    --panel: #ffffff;
+    --text: #1d2330;
+    --muted: #6b7280;
+    --border: #e3e6eb;
+    --bar: #8aa4c8;
+    --compare: #f2a93b;
+    --swap: #e5534b;
+    --sorted: #3fa76b;
+    --accent: #3b6fd8;
+    --code-hl: #fff3d6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14171c;
+      --panel: #1c2027;
+      --text: #e6e8ec;
+      --muted: #9aa3b0;
+      --border: #2c323b;
+      --bar: #56708f;
+      --compare: #e3a13a;
+      --swap: #e0605a;
+      --sorted: #44b174;
+      --accent: #6b95f0;
+      --code-hl: #3a3220;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 15px/1.5 -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", "Microsoft YaHei", sans-serif;
+  }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 24px 16px 40px; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .sub { color: var(--muted); margin: 0 0 20px; font-size: 14px; }
+
+  .layout { display: grid; grid-template-columns: 1fr 320px; gap: 16px; }
+  @media (max-width: 860px) { .layout { grid-template-columns: 1fr; } }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+  }
+
+  /* 柱状图区域 */
+  .stage { position: relative; height: 340px; margin-bottom: 8px; }
+  .bar {
+    position: absolute;
+    bottom: 26px;
+    left: 0;
+    border-radius: 6px 6px 2px 2px;
+    background: var(--bar);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    padding-top: 4px;
+    transition-property: transform, background-color, height;
+    transition-timing-function: ease-in-out;
+  }
+  .bar.cmp { background: var(--compare); }
+  .bar.swp { background: var(--swap); }
+  .bar.done { background: var(--sorted); }
+  .bar .ptr {
+    position: absolute;
+    bottom: -24px;
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .baseline {
+    position: absolute; left: 0; right: 0; bottom: 25px;
+    height: 1px; background: var(--border);
+  }
+
+  .status {
+    min-height: 48px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    background: var(--bg);
+    font-size: 15px;
+  }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 12px; font-size: 13px; color: var(--muted); }
+  .legend span::before {
+    content: ""; display: inline-block; width: 12px; height: 12px;
+    border-radius: 3px; margin-right: 6px; vertical-align: -1px; background: var(--c);
+  }
+
+  /* 控制区 */
+  .controls { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; align-items: center; }
+  button {
+    font: inherit; font-size: 14px;
+    padding: 7px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: var(--text);
+    cursor: pointer;
+  }
+  button:hover:not(:disabled) { border-color: var(--accent); }
+  button:disabled { opacity: .45; cursor: default; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; min-width: 84px; }
+
+  .sliders { display: grid; grid-template-columns: auto 1fr auto; gap: 8px 12px; align-items: center; margin-top: 16px; font-size: 14px; }
+  .sliders output { color: var(--muted); min-width: 48px; text-align: right; font-variant-numeric: tabular-nums; }
+  input[type=range] { width: 100%; accent-color: var(--accent); }
+
+  .custom { display: flex; gap: 8px; margin-top: 12px; }
+  .custom input {
+    flex: 1; min-width: 0;
+    font: inherit; font-size: 14px;
+    padding: 7px 10px; border-radius: 8px;
+    border: 1px solid var(--border); background: var(--bg); color: var(--text);
+  }
+
+  /* 右侧 */
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px; }
+  .stat { background: var(--bg); border-radius: 8px; padding: 8px 10px; }
+  .stat b { display: block; font-size: 20px; font-variant-numeric: tabular-nums; }
+  .stat small { color: var(--muted); font-size: 12px; }
+
+  pre.code {
+    margin: 0;
+    font: 13px/1.7 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    background: var(--bg);
+    border-radius: 8px;
+    padding: 8px 0;
+    overflow-x: auto;
+  }
+  pre.code div { padding: 0 12px; border-left: 3px solid transparent; white-space: pre; }
+  pre.code div.hl { background: var(--code-hl); border-left-color: var(--compare); }
+
+  .progress { height: 4px; background: var(--border); border-radius: 2px; margin-top: 12px; overflow: hidden; }
+  .progress i { display: block; height: 100%; background: var(--accent); width: 0; transition: width .15s; }
+
+  .hint { color: var(--muted); font-size: 12px; margin-top: 12px; }
+  kbd { font: 11px ui-monospace, Menlo, monospace; border: 1px solid var(--border); border-radius: 4px; padding: 0 4px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>冒泡排序 · 动画演示</h1>
+  <p class="sub">每一轮把相邻的两个元素两两比较，较大的往后“冒泡”，一轮结束后最大的元素就落到最终位置。</p>
+
+  <div class="layout">
+    <div class="card">
+      <div class="stage" id="stage"><div class="baseline"></div></div>
+      <div class="status" id="status"></div>
+      <div class="progress"><i id="progress"></i></div>
+
+      <div class="legend">
+        <span style="--c: var(--bar)">未排序</span>
+        <span style="--c: var(--compare)">正在比较</span>
+        <span style="--c: var(--swap)">交换</span>
+        <span style="--c: var(--sorted)">已归位</span>
+      </div>
+
+      <div class="controls">
+        <button class="primary" id="play">▶ 播放</button>
+        <button id="prev">⏮ 上一步</button>
+        <button id="next">下一步 ⏭</button>
+        <button id="reset">↺ 重置</button>
+        <button id="shuffle">🎲 随机数组</button>
+      </div>
+
+      <div class="sliders">
+        <label for="size">元素个数</label>
+        <input type="range" id="size" min="5" max="30" value="12">
+        <output id="sizeOut">12</output>
+
+        <label for="speed">播放速度</label>
+        <input type="range" id="speed" min="1" max="10" value="5">
+        <output id="speedOut">5</output>
+      </div>
+
+      <div class="custom">
+        <input id="customInput" placeholder="自定义数组，如：5, 3, 8, 1, 9, 2">
+        <button id="apply">使用</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="stats">
+        <div class="stat"><small>轮次</small><b id="statPass">0</b></div>
+        <div class="stat"><small>比较</small><b id="statCmp">0</b></div>
+        <div class="stat"><small>交换</small><b id="statSwp">0</b></div>
+      </div>
+      <pre class="code" id="code"></pre>
+      <div class="hint">快捷键：<kbd>空格</kbd> 播放/暂停　<kbd>←</kbd> <kbd>→</kbd> 单步</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const CODE = [
+  'for (i = 0; i < n - 1; i++) {',
+  '  swapped = false',
+  '  for (j = 0; j < n - 1 - i; j++) {',
+  '    if (a[j] > a[j + 1]) {',
+  '      swap(a[j], a[j + 1])',
+  '      swapped = true',
+  '    }',
+  '  }',
+  '  // a[n-1-i] 已归位',
+  '  if (!swapped) break',
+  '}',
+];
+
+const $ = id => document.getElementById(id);
+const stage = $('stage');
+let items = [];   // { id, v, el }
+let steps = [];
+let cur = 0;
+let timer = null;
+
+// 预先生成全部步骤，这样可以前进/后退
+function buildSteps(list) {
+  const a = list.slice();
+  const n = a.length;
+  const out = [];
+  const sorted = new Set();
+  let cmp = 0, swp = 0, pass = 0;
+  const push = s => out.push({ order: a.map(x => x.id), sorted: new Set(sorted), cmp, swp, pass, ...s });
+
+  push({ type: 'start', line: -1, msg: '初始数组，点击「播放」或「下一步」开始。' });
+  for (let i = 0; i < n - 1; i++) {
+    pass = i + 1;
+    let swapped = false;
+    push({ type: 'pass', line: 0, msg: `第 ${pass} 轮开始：从左往右比较到第 ${n - 1 - i} 个位置。` });
+    for (let j = 0; j < n - 1 - i; j++) {
+      cmp++;
+      const gt = a[j].v > a[j + 1].v;
+      push({
+        type: 'compare', line: 3, j,
+        msg: `比较 a[${j}] = ${a[j].v} 和 a[${j + 1}] = ${a[j + 1].v}：` + (gt ? `${a[j].v} > ${a[j + 1].v}，需要交换。` : '顺序正确，不交换。'),
+      });
+      if (gt) {
+        [a[j], a[j + 1]] = [a[j + 1], a[j]];
+        swp++;
+        swapped = true;
+        push({ type: 'swap', line: 4, j, msg: `交换！${a[j + 1].v} 向右移动一位。` });
+      }
+    }
+    sorted.add(a[n - 1 - i].id);
+    push({ type: 'settle', line: 8, msg: `第 ${pass} 轮结束，${a[n - 1 - i].v} 已到达最终位置。` });
+    if (!swapped) {
+      a.forEach(x => sorted.add(x.id));
+      push({ type: 'early', line: 9, msg: '这一轮没有发生任何交换，说明数组已经有序，提前结束。' });
+      break;
+    }
+  }
+  a.forEach(x => sorted.add(x.id));
+  push({ type: 'done', line: -1, msg: `🎉 排序完成！共 ${pass} 轮，比较 ${cmp} 次，交换 ${swp} 次。` });
+  return out;
+}
+
+function setData(values) {
+  stop();
+  stage.querySelectorAll('.bar').forEach(b => b.remove());
+  items = values.map((v, id) => {
+    const el = document.createElement('div');
+    el.className = 'bar';
+    el.innerHTML = `<span class="val">${v}</span><span class="ptr"></span>`;
+    stage.appendChild(el);
+    return { id, v, el };
+  });
+  steps = buildSteps(items);
+  cur = 0;
+  $('sizeOut').textContent = values.length;
+  layout();
+  render();
+}
+
+function randomValues(n) {
+  return Array.from({ length: n }, () => 5 + Math.floor(Math.random() * 95));
+}
+
+function delay() {
+  // 速度 1..10 → 1200ms..80ms
+  const s = +$('speed').value;
+  return Math.round(1200 * Math.pow(0.74, s - 1));
+}
+
+// 根据舞台尺寸计算柱子宽高
+function layout() {
+  const W = stage.clientWidth;
+  const H = stage.clientHeight - 32;
+  const n = items.length;
+  const slot = W / n;
+  const bw = Math.max(4, slot * 0.72);
+  const max = Math.max(...items.map(x => x.v));
+  items.forEach(it => {
+    it.el.style.width = bw + 'px';
+    it.el.style.height = Math.max(6, (it.v / max) * H) + 'px';
+    it.el.querySelector('.val').style.display = slot >= 22 ? '' : 'none';
+    it.slot = slot;
+    it.offset = (slot - bw) / 2;
+  });
+}
+
+function render() {
+  const st = steps[cur];
+  const dur = Math.min(450, delay() * 0.8);
+  const byId = new Map(items.map(it => [it.id, it]));
+
+  st.order.forEach((id, idx) => {
+    const it = byId.get(id);
+    const el = it.el;
+    el.style.transitionDuration = dur + 'ms';
+    el.style.transform = `translateX(${idx * it.slot + it.offset}px)`;
+    el.classList.remove('cmp', 'swp', 'done');
+    const ptr = el.querySelector('.ptr');
+    ptr.textContent = '';
+
+    if (st.sorted.has(id)) el.classList.add('done');
+    if ((st.type === 'compare' || st.type === 'swap') && (idx === st.j || idx === st.j + 1)) {
+      el.classList.remove('done');
+      el.classList.add(st.type === 'compare' ? 'cmp' : 'swp');
+      ptr.textContent = idx === st.j ? 'j' : 'j+1';
+    }
+  });
+
+  $('status').textContent = st.msg;
+  $('statPass').textContent = st.pass;
+  $('statCmp').textContent = st.cmp;
+  $('statSwp').textContent = st.swp;
+  $('progress').style.width = (cur / (steps.length - 1) * 100) + '%';
+
+  $('code').innerHTML = CODE.map((line, i) =>
+    `<div class="${i === st.line ? 'hl' : ''}">${line.replace(/</g, '&lt;')}</div>`).join('');
+
+  $('prev').disabled = cur === 0;
+  $('next').disabled = cur === steps.length - 1;
+}
+
+function go(i) {
+  cur = Math.max(0, Math.min(steps.length - 1, i));
+  render();
+}
+
+function tick() {
+  if (cur >= steps.length - 1) { stop(); return; }
+  go(cur + 1);
+  timer = setTimeout(tick, delay());
+}
+
+function play() {
+  if (cur >= steps.length - 1) go(0);
+  $('play').textContent = '⏸ 暂停';
+  timer = setTimeout(tick, 150);
+}
+
+function stop() {
+  clearTimeout(timer);
+  timer = null;
+  $('play').textContent = '▶ 播放';
+}
+
+$('play').onclick = () => timer ? stop() : play();
+$('next').onclick = () => { stop(); go(cur + 1); };
+$('prev').onclick = () => { stop(); go(cur - 1); };
+$('reset').onclick = () => { stop(); go(0); };
+$('shuffle').onclick = () => setData(randomValues(+$('size').value));
+$('size').oninput = e => setData(randomValues(+e.target.value));
+$('speed').oninput = e => { $('speedOut').textContent = e.target.value; };
+
+$('apply').onclick = () => {
+  const vals = $('customInput').value
+    .split(/[\s,，、]+/)
+    .filter(Boolean)
+    .map(Number)
+    .filter(v => Number.isFinite(v) && v > 0);
+  if (vals.length < 2) {
+    $('status').textContent = '请输入至少 2 个正数，用逗号或空格分隔。';
+    return;
+  }
+  const list = vals.slice(0, 40);
+  $('size').value = Math.min(30, Math.max(5, list.length));
+  setData(list);
+};
+$('customInput').addEventListener('keydown', e => { if (e.key === 'Enter') $('apply').click(); });
+
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT') return;
+  if (e.code === 'Space') { e.preventDefault(); $('play').click(); }
+  else if (e.key === 'ArrowRight') $('next').click();
+  else if (e.key === 'ArrowLeft') $('prev').click();
+});
+
+window.addEventListener('resize', () => { layout(); render(); });
+
+setData(randomValues(12));
+</script>
+</body>
+</html>
