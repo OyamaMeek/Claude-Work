@@ -18,6 +18,6 @@
   - `context/2026/10/31/14-40-52/对话.md`（新增）
   - 本地未提交：`.gitignore`、`.agent/skill-migration/`、`~/.claude/skills/`、`~/.claude/codex-imported/`、`~/.claude/settings.json`
 
-- **Git 提交**：待提交
+- **Git 提交**：`379805c docs: record Codex skill migration to Claude Code`
 
 ---
