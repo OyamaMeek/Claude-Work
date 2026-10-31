@@ -39,6 +39,6 @@
   - `context/2026/10/31/20-42-32/对话.md`（新增）
   - 本地未提交：`~/.claude/settings.json`、`~/.claude/plugins/`、`~/lemo-opuscar/`
 
-- **Git 提交**：待提交
+- **Git 提交**：`1aabf4c docs: record lemo-opuscar plugin installation`
 
 ---
