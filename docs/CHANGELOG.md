@@ -80,6 +80,6 @@
   - `context/2026/10/31/23-34-56/对话.md`（新增）
   - 本地未提交：`~/.claude.json`
 
-- **Git 提交**：待提交
+- **Git 提交**：`477b6cd docs: record iphone-use MCP server removal`
 
 ---
