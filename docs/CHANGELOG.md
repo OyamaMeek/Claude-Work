@@ -21,3 +21,24 @@
 - **Git 提交**：`379805c docs: record Codex skill migration to Claude Code`
 
 ---
+
+## [2026-10-31 20:42] 安装 lemo-opuscar 插件
+
+- **需求/问题描述**：
+  > 安装 https://github.com/lemomo-ai/lemo-opuscar
+
+- **实际实现的功能与改动**：
+  - [插件]：按仓库 README 添加 marketplace `lemolab`，以用户级范围安装 `lemo-opuscar@lemolab`（版本 `f17136060781`）。插件只含一个 skill 和 `setup.sh`，没有 hooks 或 MCP 配置。
+  - [风格库]：运行 `setup.sh`，把风格库下载到 `~/lemo-opuscar`（提交 `f171360`，占用 30M）。
+  - [测试/验证]：`claude plugin list` 显示插件已启用；安装后的 `setup.sh` 与仓库版本内容相同；`setup.sh` 退出码为 0。
+  - [未完成]：缺少 ffmpeg 7+ 和 Python 3.11+（或 uv），本机 Python 为 3.9.6；`setup.sh deps` 尚未运行；没有实际渲染影片；当前会话的 skill 列表未包含新插件。
+
+- **涉及文件**：
+  - `memory/agents.md` (+2 / -0)
+  - `docs/CHANGELOG.md`
+  - `context/2026/10/31/20-42-32/对话.md`（新增）
+  - 本地未提交：`~/.claude/settings.json`、`~/.claude/plugins/`、`~/lemo-opuscar/`
+
+- **Git 提交**：待提交
+
+---
