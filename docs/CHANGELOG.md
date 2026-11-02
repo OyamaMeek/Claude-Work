@@ -99,6 +99,6 @@
   - `context/2026/11/02/12-38-51/对话.md`（新增）
   - 本地未提交：`~/.claude.json`
 
-- **Git 提交**：待提交
+- **Git 提交**：`d01f3c9 docs: record rea MCP server removal`
 
 ---
