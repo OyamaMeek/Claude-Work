@@ -83,3 +83,22 @@
 - **Git 提交**：`477b6cd docs: record iphone-use MCP server removal`
 
 ---
+
+## [2026-11-02 12:38] 移除 rea MCP 服务器
+
+- **需求/问题描述**：
+  > 用户发送连接器窗口中 Rea 的截图，要求不要连接 rea。
+
+- **实际实现的功能与改动**：
+  - [移除服务器]：运行 `claude mcp remove rea -s user`，从 `~/.claude.json` 的用户级配置中移除该服务器；`/opt/homebrew/bin/rea` 程序本身保留。
+  - [测试/验证]：命令退出码为 0；`claude mcp get rea` 报告服务器不存在；`~/.claude.json` 不再包含 `"rea"` 配置项。
+  - [未完成验证]：当前会话的连接器状态仍显示 rea 已连接，已加载的进程在会话结束前不会断开；没有开启新会话核对显示结果。
+
+- **涉及文件**：
+  - `docs/CHANGELOG.md`
+  - `context/2026/11/02/12-38-51/对话.md`（新增）
+  - 本地未提交：`~/.claude.json`
+
+- **Git 提交**：待提交
+
+---
