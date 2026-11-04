@@ -118,6 +118,6 @@
   - `docs/CHANGELOG.md`
   - `context/2026/11/04/12-03-30/对话.md`（新增）
 
-- **Git 提交**：待提交
+- **Git 提交**：`0717873 docs: record bubble sort C++ demo page`
 
 ---
