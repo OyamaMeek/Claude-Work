@@ -159,6 +159,6 @@
   - `context/2026/11/05/20-51-43/对话.md`（新增）
   - 本地未提交：`.gitignore` (+1 / -1)，该文件不在保留范围内，也未被跟踪
 
-- **Git 提交**：待提交
+- **Git 提交**：`309c65d docs: point retention rule at Claude.md`
 
 ---
