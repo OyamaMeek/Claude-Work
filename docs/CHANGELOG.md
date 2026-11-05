@@ -121,3 +121,23 @@
 - **Git 提交**：`0717873 docs: record bubble sort C++ demo page`
 
 ---
+
+## [2026-11-05 20:47] 提示词审计
+
+- **需求/问题描述**：
+  > 运行 `/claude-api prompy-audit`（按 `prompt-audit` 子命令执行），审计项目中的提示词与代理配置文件。
+
+- **实际实现的功能与改动**：
+  - [审计报告]：新增 `docs/prompt-audit-2026-11-05.md`，以 Claude Opus 5.5 为目标模型审计 `Claude.md` 与 `memory/` 记录，共 10 项发现：高置信度 3 项（`AGENTS.md` 与实际文件名 `Claude.md` 不一致；`.agents/skills/`、`.githooks/pre-commit` 被写成“已有”但并不存在），中置信度 3 项（计划位置前后矛盾、§5 分步规划流程、策略提示），低置信度 4 项只做标记。
+  - [建议 diff]：包含第 2–6 项的补丁另存于本地 `.agent/prompt-audit/proposed.patch`（不提交），`Claude.md` 未修改。
+  - [测试/验证]：`git apply --check` 确认补丁可以干净应用；被引用路径是否存在已用 `ls` 核对。没有评测或探针，因此未做修改前后的行为对比。
+
+- **涉及文件**：
+  - `docs/prompt-audit-2026-11-05.md` (+74 / -0)
+  - `docs/CHANGELOG.md`
+  - `context/2026/11/05/20-47-11/对话.md`（新增）
+  - 本地未提交：`.agent/prompt-audit/Claude.md`、`.agent/prompt-audit/proposed.patch`
+
+- **Git 提交**：待提交
+
+---
