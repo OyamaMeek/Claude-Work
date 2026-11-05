@@ -138,6 +138,6 @@
   - `context/2026/11/05/20-47-11/对话.md`（新增）
   - 本地未提交：`.agent/prompt-audit/Claude.md`、`.agent/prompt-audit/proposed.patch`
 
-- **Git 提交**：待提交
+- **Git 提交**：`8724366 docs: add prompt audit report for Claude.md`
 
 ---
