@@ -141,3 +141,24 @@
 - **Git 提交**：`8724366 docs: add prompt audit report for Claude.md`
 
 ---
+
+## [2026-11-05 20:51] Git 保留范围改为 Claude.md
+
+- **需求/问题描述**：
+  > 针对审计第 1 项，用户选择把 Git 保留规则中的根目录 `AGENTS.md` 改为 `Claude.md`。
+
+- **实际实现的功能与改动**：
+  - [保留规则]：`Claude.md` 标题与 §11 第一条中的 `AGENTS.md` 改为 `Claude.md`；本地 `.gitignore` 的 `!AGENTS.md` 改为 `!Claude.md`。
+  - [进度记录]：`memory/progress.md` 的范围外事项中删除 `Claude.md`，只保留 `bubble-sort.html`、`bucket-sort.html`。
+  - [测试/验证]：`git check-ignore -v --no-index` 显示 `Claude.md` 命中 `!Claude.md` 规则、不再被忽略，`bubble-sort.html` 仍命中 `*` 规则；`.agent/prompt-audit/proposed.patch` 用 `git apply --check` 检查后仍可应用。
+
+- **涉及文件**：
+  - `Claude.md` (+2 / -2)
+  - `memory/progress.md` (+1 / -1)
+  - `docs/CHANGELOG.md`
+  - `context/2026/11/05/20-51-43/对话.md`（新增）
+  - 本地未提交：`.gitignore` (+1 / -1)，该文件不在保留范围内，也未被跟踪
+
+- **Git 提交**：待提交
+
+---

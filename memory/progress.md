@@ -10,4 +10,4 @@
 
 ## 范围外事项
 
-- 仓库仍跟踪 `Claude.md`、`bubble-sort.html`、`bucket-sort.html`，它们不在远端保留范围内；本次未处理。
+- 仓库仍跟踪 `bubble-sort.html`、`bucket-sort.html`，它们不在远端保留范围内；本次未处理。
