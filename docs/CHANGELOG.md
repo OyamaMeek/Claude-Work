@@ -180,6 +180,6 @@
   - `context/2026/11/25/19-50-45/对话.md`（新增）
   - 本地未提交：`quick-sort.html`（601 行）、`.agent/quick-sort/`（`extract_cpp.py`、`test.cpp`、`browser_check.js`）
 
-- **Git 提交**：待提交
+- **Git 提交**：`0590672 docs: record quick sort demo page task`
 
 ---
