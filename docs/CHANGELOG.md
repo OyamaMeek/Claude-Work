@@ -162,3 +162,24 @@
 - **Git 提交**：`309c65d docs: point retention rule at Claude.md`
 
 ---
+
+## [2026-11-25 19:50] 快速排序演示页面（C++ 代码侧栏）
+
+- **需求/问题描述**：
+  > 用 HTML 写一个快速排序的演示页面，旁边的代码使用 C++。
+
+- **实际实现的功能与改动**：
+  - [演示页面]：新增本地文件 `quick-sort.html`，结构与配色沿用 `bubble-sort.html`。左侧柱状图展示当前区间 [low, high]、pivot、小于 pivot 的区域、比较与交换、已归位元素，以及 i、j 指针；右侧为带语法高亮和行号的 C++ 源码（Lomuto 分区），随步骤高亮对应行，并显示比较与交换次数、递归深度、变量 low/high/pivot/i/j 和递归调用栈。支持播放/暂停、单步前进与后退、重置、随机数组、元素个数、播放速度、自定义数组（非法输入会提示具体内容），以及空格和方向键快捷键。
+  - [测试/验证]：`.agent/quick-sort/extract_cpp.py` 用 `html.parser` 从页面提取 C++ 源码，`clang++ -std=c++17 -Wall -Wextra -Werror -fsanitize=address,undefined` 编译测试程序，12200 组随机、已排序、逆序、多重复值数组与 `std::sort` 结果一致。浏览器中对 `buildSteps` 运行 2120 组数组（含全相同值、升序、逆序），最终顺序全部有序，每次 pivot 归位时左侧均小于 pivot、右侧均不小于 pivot，0 失败；按钮、速度滑块、非法与合法自定义输入、自动播放到结束均按预期工作，控制台无错误；375px 宽度下页面无横向滚动，代码区在框内滚动。未做截图检查。
+
+- **涉及文件**：
+  - `memory/plan.md` (+7 / -0)
+  - `memory/verify.md` (+6 / -0)
+  - `memory/progress.md` (+7 / -0)
+  - `docs/CHANGELOG.md`
+  - `context/2026/11/25/19-50-45/对话.md`（新增）
+  - 本地未提交：`quick-sort.html`（601 行）、`.agent/quick-sort/`（`extract_cpp.py`、`test.cpp`、`browser_check.js`）
+
+- **Git 提交**：待提交
+
+---
