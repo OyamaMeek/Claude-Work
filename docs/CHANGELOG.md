@@ -183,3 +183,25 @@
 - **Git 提交**：`0590672 docs: record quick sort demo page task`
 
 ---
+
+## [2026-11-25 19:57] 安装 frontend-design 并重新设计快速排序页面
+
+- **需求/问题描述**：
+  > 用 frontend-design 重新设计快速排序演示页面；该 skill 未安装，用户给出 GitHub 地址 `anthropics/skills/skills/frontend-design` 并要求先安装。
+
+- **实际实现的功能与改动**：
+  - [安装 skill]：从 `anthropics/skills`（提交 `e4bb5d9`）稀疏克隆 `skills/frontend-design`，读完 SKILL.md（只有设计指导文字，没有脚本）后复制到 `~/.claude/skills/frontend-design/`（SKILL.md、LICENSE.txt），当前会话的 skill 列表已出现该 skill。
+  - [页面重新设计]：按 skill 流程先定方案再实现。浅色为工程方格纸、深色为蓝图纸；墨水蓝为主色，红色只用于 pivot 和交换，荧光黄表示比较，已归位元素用墨水填实；标题使用站酷小薇，代码和数字使用 IBM Plex Mono。去掉白色圆角卡片、统计卡片、标题中的「·」、emoji 和感叹号。调用栈改为柱子下方按递归深度排列的区间条带，实心条带表示正在执行的调用。补充语义化结构（header、main、section、aside、dl）、`aria-live` 状态区、键盘焦点框、减弱动态效果设置和 favicon；按钮文字改为「播放」「回到开头」「换一组随机数」「排序这组数」等。排序算法与 C++ 源码未改动。
+  - [测试/验证]：页面中的 C++ 源码重新提取并用 `clang++ -Wall -Wextra -Werror` 加 ASan/UBSan 编译，12200 组数组与 `std::sort` 一致；浏览器中 2120 组数组的步骤生成 0 失败；非法输入提示、单步、后退、回到开头、自动播放到结束、条带随调用栈变化均正常；30 个升序元素时递归深度 30，条带区高度保持 132px；两种字体均已加载；控制台无错误；375px 宽度下无横向滚动，柱子和条带都在舞台内。未做截图检查。
+
+- **涉及文件**：
+  - `memory/agents.md` (+1 / -1)
+  - `memory/plan.md` (+3 / -1)
+  - `memory/progress.md` (+1 / -0)
+  - `docs/CHANGELOG.md`
+  - `context/2026/11/25/19-57-35/对话.md`（新增）
+  - 本地未提交：`quick-sort.html`（重写，636 行）、`~/.claude/skills/frontend-design/`
+
+- **Git 提交**：待提交
+
+---

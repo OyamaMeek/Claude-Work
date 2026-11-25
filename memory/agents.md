@@ -3,7 +3,7 @@
 - 当前代理：Claude Code（桌面应用 Code 标签页），命令行版本 2.1.268。
 - 终端内的 `claude` 命令行尚未登录，无法发起模型请求；`claude plugin` 等本地管理命令可用。
 - Skill 位置：
-  - `~/.claude/skills/`：从 Codex 复制的用户级 skill（98 个，另有已存在的 `ego-browser`）。
+  - `~/.claude/skills/`：从 Codex 复制的用户级 skill（98 个，另有已存在的 `ego-browser`），以及 2026-11-25 从 GitHub 仓库 `anthropics/skills`（提交 `e4bb5d9`）安装的 `frontend-design`。
   - `~/.claude/codex-imported/`：本地 marketplace `codex-imported` 的来源目录，含 30 个插件。
   - `~/.claude/plugins/cache/codex-imported/`：Claude Code 安装后的插件副本。
   - `~/.claude/plugins/cache/lemolab/`：插件 `lemo-opuscar@lemolab`，来源为 GitHub 仓库 `lemomo-ai/lemo-opuscar`。
