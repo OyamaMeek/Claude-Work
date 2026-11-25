@@ -202,6 +202,6 @@
   - `context/2026/11/25/19-57-35/对话.md`（新增）
   - 本地未提交：`quick-sort.html`（重写，636 行）、`~/.claude/skills/frontend-design/`
 
-- **Git 提交**：待提交
+- **Git 提交**：`d849e10 docs: record frontend-design install and quick sort redesign`
 
 ---
