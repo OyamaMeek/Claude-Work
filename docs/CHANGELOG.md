@@ -205,3 +205,24 @@
 - **Git 提交**：`d849e10 docs: record frontend-design install and quick sort redesign`
 
 ---
+
+## [2026-11-28 09:43] 选择排序演示页面（C++ 代码侧栏）
+
+- **需求/问题描述**：
+  > 用 frontend-design 的流程，以 HTML 写一个选择排序的演示页面，旁边的代码使用 C++。
+
+- **实际实现的功能与改动**：
+  - [演示页面]：新增本地文件 `selection-sort.html`。整页为教室黑板配色（深板绿底，粉笔白表示未排序，粉笔粉表示正在比较的 a[j]，粉笔黄表示当前最小值，粉笔蓝表示已排好），标题用龙藏体，代码和数字用 JetBrains Mono。柱子上方有一条粉笔黄虚线，高度等于当前最小值，横跨未排序区，找到更小的数时下降；柱子下方的逐趟记录表每趟追加一行数组快照，圈出本趟选出的最小值，粉色标出被换走的数，已排好的前缀加底色。右侧为带行号与语法高亮的 C++ 源码，随步骤高亮对应行，并显示 i、j、minIdx、a[minIdx]；另有比较次数、交换次数、当前趟数和进度条。支持播放与暂停、单步前进与后退、回到开头、随机数组、元素个数（5–20）、速度、自定义数组（2–20 个正整数，非法输入会提示具体内容），以及空格和方向键快捷键。
+  - [测试/验证]：`.agent/selection-sort/extract_cpp.py` 用 `html.parser` 提取页面中的 C++ 源码，`clang++ -std=c++17 -Wall -Wextra -Werror -fsanitize=address,undefined` 编译测试程序，12200 组随机、已排序、逆序、全相同、多重复值数组与 `std::sort` 一致。浏览器中对 `buildSteps` 运行 1890 组数组：最终有序，比较次数均为 n(n-1)/2，每趟结束时 a[i] 是 a[i..n-1] 的最小值，记录表每行与当时数组一致，交换次数等于 minIdx != i 的趟数，0 失败。按钮、快捷键、非法与合法自定义输入、自动播放到结束、最小值虚线与当前最小值柱顶对齐均按预期工作，控制台无错误；375px 宽度下页面无横向滚动，记录表和代码区在框内滚动。预览环境没有加载 Google Fonts，字体显示未确认；未做截图检查。
+
+- **涉及文件**：
+  - `memory/plan.md` (+9 / -0)
+  - `memory/verify.md` (+6 / -0)
+  - `memory/progress.md` (+7 / -0)
+  - `docs/CHANGELOG.md`
+  - `context/2026/11/28/09-43-40/对话.md`（新增）
+  - 本地未提交：`selection-sort.html`（632 行）、`.agent/selection-sort/`（`extract_cpp.py`、`test.cpp`、`browser_check.js`）
+
+- **Git 提交**：待提交
+
+---
