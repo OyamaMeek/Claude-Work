@@ -223,6 +223,6 @@
   - `context/2026/11/28/09-43-40/对话.md`（新增）
   - 本地未提交：`selection-sort.html`（632 行）、`.agent/selection-sort/`（`extract_cpp.py`、`test.cpp`、`browser_check.js`）
 
-- **Git 提交**：待提交
+- **Git 提交**：`bf1bba1 docs: record selection sort demo page task`
 
 ---
